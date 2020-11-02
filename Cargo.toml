@@ -1,0 +1,17 @@
+[package]
+name = "squares-rnd"
+version = "1.0.0"
+authors = ["Douman <douman@gmx.se>"]
+edition = "2018"
+license = "BSL-1.0"
+repository = "https://github.com/DoumanAsh/squares-rnd"
+readme = "README.md"
+description = "Simple and fast counter based non-crypto random generator"
+keywords = ["rand", "random"]
+categories = ["algorithms"]
+include = [
+    "**/*.rs",
+    "Cargo.toml",
+    "README.md"
+]
+

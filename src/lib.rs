@@ -83,6 +83,7 @@ impl Rand {
 
     #[inline]
     pub fn next_u64(&self) -> u64 {
-        ((self.next_u32() as u64) << 32) | (self.next_u32() as u64)
+        let counter = self.counter.fetch_add(2, Ordering::AcqRel);
+        ((rand(counter, self.key) as u64) << 32) | (rand(counter + 1, self.key) as u64)
     }
 }

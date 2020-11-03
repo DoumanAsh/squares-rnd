@@ -14,6 +14,7 @@
 //!This crate provides single key for use, to have more see [gist](https://gist.githubusercontent.com/DoumanAsh/6e2b862242b7863c5119320ed5dae863/raw/2d17fd5937f158b62b8acdb4f5d590e310331b16/keys)
 
 #![no_std]
+#![warn(missing_docs)]
 
 use core::sync::atomic::{AtomicU64, Ordering};
 
@@ -52,22 +53,25 @@ pub struct Rand {
 }
 
 impl Rand {
-    #[inline]
+    #[inline(always)]
     ///Creates new instance with provided key.
     pub const fn new(key: u64) -> Self {
+        Self::with_counter(0, key)
+    }
+
+    #[inline]
+    ///Creates new instance with provided key and initial value of counter.
+    pub const fn with_counter(counter: u64, key: u64) -> Self {
         Self {
-            counter: AtomicU64::new(0),
+            counter: AtomicU64::new(counter),
             key,
         }
     }
 
     #[inline]
-    ///Sets new counter value
-    pub const fn set_counter(self, counter: u64) -> Self {
-        Self {
-            counter: AtomicU64::new(counter),
-            key: self.key
-        }
+    ///Sets new counter value, returning old one
+    pub fn set_counter(&self, counter: u64) -> u64 {
+        self.counter.swap(counter, Ordering::AcqRel)
     }
 
     #[inline]
@@ -77,13 +81,70 @@ impl Rand {
     }
 
     #[inline]
+    ///Generates new `u32`
     pub fn next_u32(&self) -> u32 {
         rand(self.counter.fetch_add(1, Ordering::AcqRel), self.key)
     }
 
     #[inline]
+    ///Generates new `u32` in range `0..to`
+    pub fn next_u32_up(&self, to: u32) -> u32 {
+        #[inline(always)]
+        fn mul_high_u32(a: u32, b: u32) -> u32 {
+            (((a as u64) * (b as u64)) >> 32) as u32
+        }
+
+        //https://lemire.me/blog/2016/06/30/fast-random-shuffling/
+        let mut result = self.next_u32();
+        let mut hi = mul_high_u32(result, to);
+        let mut lo = result.wrapping_mul(to);
+
+        if lo < to {
+            while lo < (to.wrapping_neg() % to) {
+                result = self.next_u32();
+                hi = mul_high_u32(result, to);
+                lo = result.wrapping_mul(to);
+            }
+        }
+
+        hi
+    }
+
+    #[inline]
+    ///Generates new `u64`
     pub fn next_u64(&self) -> u64 {
         let counter = self.counter.fetch_add(2, Ordering::AcqRel);
         ((rand(counter, self.key) as u64) << 32) | (rand(counter + 1, self.key) as u64)
+    }
+
+    #[inline]
+    ///Generates new `u64` in range `0..to`
+    pub fn next_u64_up(&self, to: u64) -> u64 {
+        #[inline(always)]
+        fn mul_high_u64(a: u64, b: u64) -> u64 {
+            (((a as u128) * (b as u128)) >> 64) as u64
+        }
+
+        //https://lemire.me/blog/2016/06/30/fast-random-shuffling/
+        let mut result = self.next_u64();
+        let mut hi = mul_high_u64(result, to);
+        let mut lo = result.wrapping_mul(to);
+
+        if lo < to {
+            while lo < (to.wrapping_neg() % to) {
+                result = self.next_u64();
+                hi = mul_high_u64(result, to);
+                lo = result.wrapping_mul(to);
+            }
+        }
+
+        hi
+    }
+}
+
+impl Default for Rand {
+    #[inline(always)]
+    fn default() -> Self {
+        Self::new(KEY)
     }
 }

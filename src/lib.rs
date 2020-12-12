@@ -40,7 +40,10 @@ pub const fn rand(counter: u64, key: u64) -> u32 {
     x = x.wrapping_mul(x).wrapping_add(z);
     x = (x >> 32) | (x << 32);
 
-    (x.wrapping_mul(x).wrapping_add(y) >> 32) as u32
+    x = x.wrapping_mul(x).wrapping_add(y);
+    x = (x >> 32) | (x << 32);
+
+    (x.wrapping_mul(x).wrapping_add(z) >> 32) as u32
 }
 
 #[derive(Debug)]

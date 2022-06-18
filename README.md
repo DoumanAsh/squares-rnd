@@ -1,6 +1,6 @@
 # squares-rnd
 
-![Rust](https://github.com/DoumanAsh/uuid/workflows/Rust/badge.svg?branch=master)
+![Rust](https://github.com/DoumanAsh/squares-rnd/workflows/Rust/badge.svg?branch=master)
 [![Crates.io](https://img.shields.io/crates/v/squares-rnd.svg)](https://crates.io/crates/squares-rnd)
 [![Documentation](https://docs.rs/squares-rnd/badge.svg)](https://docs.rs/crate/squares-rnd/)
 

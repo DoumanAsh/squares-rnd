@@ -106,8 +106,11 @@ fn verify_u32() {
     ];
 
     let rand = Rand::new(KEY);
-    for expected in expected.iter() {
-        assert_eq!(rand.next_u32(), *expected);
+    for expected in expected.chunks(2) {
+        assert_eq!(rand.next_u32(), expected[0]);
+        let res = rand.next_full_u32();
+        assert!(res.counter % 2 != 0); //counter starts from 0 so always must be true
+        assert_eq!(res.value, expected[1]);
     }
 }
 
@@ -217,7 +220,10 @@ fn verify_u64() {
     ];
 
     let rand = Rand::new(KEY);
-    for expected in expected.iter() {
-        assert_eq!(rand.next_u64(), *expected);
+    for expected in expected.chunks(2) {
+        assert_eq!(rand.next_u64(), expected[0]);
+        let res = rand.next_full_u64();
+        assert!(res.counter % 2 != 0); //counter starts from 0 so always must be true
+        assert_eq!(res.value, expected[1]);
     }
 }

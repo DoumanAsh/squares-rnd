@@ -76,6 +76,14 @@ pub const fn rand64(counter: u64, key: u64) -> u64 {
 }
 
 
+///Full rand result
+pub struct RandRes<T> {
+    ///Counter, used to generate `value`
+    pub counter: u64,
+    ///Value generated with `counter.
+    pub value: T
+}
+
 #[derive(Debug)]
 ///Stateful representation of algorithm.
 ///
@@ -114,6 +122,16 @@ impl Rand {
     }
 
     #[inline]
+    ///Generates new `u32` together with corresponding counter value
+    pub fn next_full_u32(&self) -> RandRes<u32> {
+        let counter = self.counter.fetch_add(1, Ordering::AcqRel);
+        RandRes {
+            counter,
+            value: rand32(counter, self.key)
+        }
+    }
+
+    #[inline]
     ///Generates new `u32`
     pub fn next_u32(&self) -> u32 {
         rand32(self.counter.fetch_add(1, Ordering::AcqRel), self.key)
@@ -141,6 +159,16 @@ impl Rand {
         }
 
         hi
+    }
+
+    #[inline]
+    ///Generates new `u64` together with corresponding counter value
+    pub fn next_full_u64(&self) -> RandRes<u64> {
+        let counter = self.counter.fetch_add(1, Ordering::AcqRel);
+        RandRes {
+            counter,
+            value: rand64(counter, self.key)
+        }
     }
 
     #[inline]
